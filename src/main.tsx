@@ -1,4 +1,4 @@
-import { gameState, play, TIMEBUF_SIZE } from "./game";
+import { gameState, play, preInit, TIMEBUF_SIZE } from "./game";
 import { Button, Dialog, Icon, Link } from "./ui";
 import { store } from "./store";
 import { OpfsExplorer } from "./fs";
@@ -85,13 +85,14 @@ const TopBar: Component<{
 	});
 
 	this.mount = () => {
+		const interval = 250;
 		setInterval(() => {
 			if (gameState.playing) {
 				const avgFrametime = gameState.timebuf.toArray().reduce((acc, x) => acc + x, 0) / TIMEBUF_SIZE;
 				const avgFps = (1000 / avgFrametime).toFixed(0);
 				this.fps.innerText = "" + avgFps;
 			}
-		}, 1000);
+		}, interval);
 	}
 
 	return (
@@ -181,7 +182,7 @@ const GameView: Component<{ canvas: HTMLCanvasElement }, {}> = function() {
 			border: 2px solid var(--surface6);
 		}
 		div.started, canvas.stopped {
-			display: none;
+			visibility: hidden;
 		}
 
 		div {
@@ -204,16 +205,22 @@ const GameView: Component<{ canvas: HTMLCanvasElement }, {}> = function() {
 			background: black;
 		}
 	`;
-	const playing = use(gameState.playing, x => x ? "started" : "stopped");
+	const div = use(gameState.playing, x => x ? "started" : "stopped");
+	const canvas = use(gameState.playing, x => x ? "canvas started" : "canvas stopped");
+
+	this.mount = () => {
+		// dotnet will immediately transfer the canvas to deputy thread, so this.mount is required
+		preInit();
+	};
 
 	return (
 		<div>
-			<div class={playing}>
+			<div class={div}>
 				Game not running.
 			</div>
 			<canvas
 				id="canvas"
-				class={playing}
+				class={canvas}
 				bind:this={use(this.canvas)}
 				on:contextmenu={(e: Event) => e.preventDefault()}
 			/>
@@ -242,7 +249,7 @@ const LogView: Component<{}, {}> = function() {
 	}
 
 	this.mount = () => {
-		setInterval(() => {
+		useChange([gameState.logbuf], () => {
 			if (gameState.logbuf.length > 0) {
 				for (const log of gameState.logbuf) {
 					this.root.appendChild(create(log.color, log.log));
@@ -250,7 +257,7 @@ const LogView: Component<{}, {}> = function() {
 				this.root.scrollTop = this.root.scrollHeight;
 				gameState.logbuf = [];
 			}
-		}, 1000);
+		});
 	};
 
 	return (

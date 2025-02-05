@@ -11,7 +11,7 @@
 		<TrimMode>partial</TrimMode>
 
 		<NoWarn>IL2026,IL2045,IL2046,IL2055,IL2057,IL2060,IL2062,IL2065,IL2067,IL2070,IL2072,IL2075,IL2077,IL2080,IL2087,IL2090,IL2091,IL2104,IL2111</NoWarn>
-		<NoWarn>$(NoWarn),SYSLIB0011,CS0169,CS0219,CS0649,CS8981,CA2022,CA1416,SYSLIB0003</NoWarn>
+		<NoWarn>$(NoWarn),SYSLIB0003,SYSLIB0011,CS0169,CS0219,CS0649,CS8981,CA2022,CA1416</NoWarn>
 
 		<WasmBuildNative>true</WasmBuildNative>
 		<WasmEnableThreads>true</WasmEnableThreads>
@@ -23,15 +23,19 @@
 		<WasmNativeStrip>true</WasmNativeStrip>
 		<WasmNativeDebugSymbols>false</WasmNativeDebugSymbols>
 
-		<EmccExtraLDFlags>-sMIN_WEBGL_VERSION=2 -sWASMFS -Wl,--no-check-features</EmccExtraLDFlags>
+		<EmccExtraLDFlags>-sMIN_WEBGL_VERSION=2 -sWASMFS -sOFFSCREENCANVAS_SUPPORT -Wl,--no-check-features</EmccExtraLDFlags>
 		<EmccLinkOptimizationFlag>-O3</EmccLinkOptimizationFlag>
 		<EmccCompileOptimizationFlag>-O3</EmccCompileOptimizationFlag>
 		<EmccEnvironment>web,worker</EmccEnvironment>
 	</PropertyGroup>
 
 	<ItemGroup>
+		<WasmOptConfigurationFlags Include="--converge -O4 -Oz"></WasmOptConfigurationFlags>
+	</ItemGroup>
+
+	<ItemGroup>
 		<!-- FNA -->
-		<NativeFileReference Include="statics\SDL2.a" />
+		<NativeFileReference Include="statics\SDL3.a" />
 		<NativeFileReference Include="statics\FNA3D.a" />
 		<NativeFileReference Include="statics\libmojoshader.a" />
 		<NativeFileReference Include="statics\FAudio.a" />
@@ -43,11 +47,8 @@
 		<!-- MonoMod -->
 		<NativeFileReference Include="statics\liba.o" />
 
-		<!-- WASMFS -->
+		<!-- WASMFS + SDL fixes -->
 		<NativeFileReference Include="celeste\Emscripten.c" />
-
-		<!-- SDL stubs -->
-		<NativeFileReference Include="celeste\SDL.c" />
 	</ItemGroup>
 
 	<ItemGroup>

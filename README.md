@@ -13,11 +13,9 @@ This "fork" will be merged into [the original](https://github.com/mercuryWorksho
 - You may encounter issues on firefox.
 
 ## I want to build this
-1. install arch packages `dotnet-host-bin dotnet-runtime-bin dotnet-sdk-bin dotnet-targeting-pack-bin aspnet-runtime-bin diffutils patch wget`
-    - note that the `-bin` prefix is only because arch repos haven't updated to dotnet 9, use the unprefixed packages if they are dotnet 9 
-    - also install the dotnet 8 runtime, right now that's `dotnet-runtime`
+1. install arch packages `dotnet-sdk-9.0 dotnet-runtime-8.0 diffutils patch wget`
 2. run `dotnet tool install --global ilspycmd --version 9.0.0.7889`
-3. clone [FNA](https://github.com/FNA-XNA/FNA) version 24.01 in the parent dir (`../`)
+3. clone [FNA](https://github.com/FNA-XNA/FNA) version 25.02 (with submodules) in the parent dir (`../`)
 4. clone [this MonoMod fork](https://github.com/r58playz/MonoMod) in the parent dir
 4. apply (`git apply ...`) `FNA.patch` to FNA
 5. run `sudo dotnet workload restore` in this dir
@@ -40,7 +38,6 @@ to enable the download/decrypt feature:
 
 **main improvements that need to be done:**
 - fix freezes due to fmod
-- remove the janky `WRAP_FNA` stuff and replace it with a SDL that doesn't use EGL emulation
 - fix freeze when removing controller while in a level
 
 ## I want to port this to a newer version of celeste (once it exists)
@@ -52,8 +49,6 @@ to enable the download/decrypt feature:
     - `celeste/Program.cs` sets up the Celeste object and exports a function that polls its main loop
     - `celeste/Hooks` uses MonoMod to fix some issues and add features
     - `celeste/Steamworks.cs` polyfills the Steam achievements API for Steam builds of Celeste
-    - dotnet even supports JITing WASM but it uses more resources and is overall slower so right now AOT is used
 - FMOD's WASM builds don't support threads so a wrapper that proxies it to the main thread is built and used instead
     - See `tools/fmod-patch` for more information
-- SDL2 doesn't use the native Emscripten WebGL apis and instead uses Emscripten's EGL emulation, so calling GL apis always fails
-    - To fix this, another wrapper is used that proxies all FNA3D calls to the main thread
+- The game canvas is transferred to dotnet's "deputy thread" and all rendering is done from there

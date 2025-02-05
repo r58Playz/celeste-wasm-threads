@@ -47,7 +47,7 @@ partial class Program
     static Assembly celeste;
 
     [JSExport]
-    internal static void Init()
+    internal static Task Init()
     {
         try
         {
@@ -81,12 +81,13 @@ partial class Program
         {
             Console.Error.WriteLine("Error in Init()!");
             Console.Error.WriteLine(e);
-            throw;
+            return Task.FromException(e);
         }
+        return Task.Delay(0);
     }
 
     [JSExport]
-    internal static void Cleanup()
+    internal static Task Cleanup()
     {
         try
         {
@@ -98,12 +99,13 @@ partial class Program
         {
             Console.Error.WriteLine("Error in Cleanup()!");
             Console.Error.WriteLine(e);
-            throw;
+            return Task.FromException(e);
         }
+        return Task.Delay(0);
     }
 
     [JSExport]
-    internal static bool MainLoop()
+    internal static Task<bool> MainLoop()
     {
         try
         {
@@ -113,8 +115,8 @@ partial class Program
         {
             Console.Error.WriteLine("Error in MainLoop()!");
             Console.Error.WriteLine(e);
-            throw;
+            return (Task<bool>)Task.FromException(e);
         }
-        return game.RunApplication;
+        return Task.FromResult(game.RunApplication);
     }
 }

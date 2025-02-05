@@ -32,6 +32,7 @@ function proxyConsole(name: string, color: string) {
 			color,
 			log: `[${new Date().toISOString()}]: ${str}`
 		});
+		gameState.logbuf = gameState.logbuf;
 	}
 }
 proxyConsole("error", "var(--error)");
@@ -72,16 +73,12 @@ const wasm = await eval(`import("/_framework/dotnet.js")`);
 const dotnet = wasm.dotnet;
 let exports: any;
 
-async function preInit() {
+export async function preInit() {
 	console.debug("initializing dotnet");
-	const runtime = await dotnet.withConfig({
-		jsThreadBlockingMode: "DangerousAllowBlockingWait",
-	}).create();
+	const runtime = await dotnet.create();
 
 	const config = runtime.getConfig();
 	exports = await runtime.getAssemblyExports(config.mainAssemblyName);
-	const canvas = document.getElementById("canvas")! as HTMLCanvasElement;
-	dotnet.instance.Module.canvas = canvas;
 
 	(self as any).wasm = {
 		Module: dotnet.instance.Module,
@@ -89,7 +86,6 @@ async function preInit() {
 		runtime,
 		config,
 		exports,
-		canvas,
 	};
 
 	console.debug("PreInit...");
@@ -99,21 +95,20 @@ async function preInit() {
 
 	gameState.ready = true;
 };
-preInit();
 
 export async function play() {
 	gameState.playing = true;
 
 	const before = performance.now();
 	console.debug("Init...");
-	exports.Program.Init();
+	await exports.Program.Init();
 	const after = performance.now();
 	console.debug(`Init : ${(after - before).toFixed(2)}ms`);
 
 	console.debug("MainLoop...");
-	const main = () => {
+	const main = async () => {
 		const before = performance.now();
-		const ret = exports.Program.MainLoop();
+		const ret = await exports.Program.MainLoop();
 		const after = performance.now();
 
 		gameState.timebuf.add(after - before);
@@ -123,7 +118,7 @@ export async function play() {
 
 			gameState.timebuf.clear();
 
-			exports.Program.Cleanup();
+			await exports.Program.Cleanup();
 			gameState.ready = false;
 			gameState.playing = false;
 
