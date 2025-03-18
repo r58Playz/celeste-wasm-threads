@@ -6,7 +6,8 @@
 
 A mostly-complete port of Celeste (2018) to WebAssembly using dotnet 9's threaded WASM support and [FNA WASM libraries](https://github.com/r58playz/FNA-WASM-Build).
 
-This "fork" will be merged into [the original](https://github.com/mercuryWorkshop/celeste-wasm) soon.
+> [!NOTE]
+> This "fork" is no longer being updated and development has moved to the [`threads-v2` branch](https://github.com/MercuryWorkshop/celeste-wasm/tree/threads-v2).
 
 ## Limitations
 - Loading the game consumes 600M or so of memory, which is still around 3x lower than the original port, but it is still too much for low end devices.
